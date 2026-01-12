@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quant Terminal</title>
+    <style>
+        body { 
+            background-color: #0b0e11; 
+            color: white; 
+            font-family: Arial, sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .container {
+            background: #1e2329;
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid #30363d;
+            text-align: center;
+            width: 80%;
+        }
+        h1 { color: #f0b90b; margin-bottom: 10px; }
+        .data { font-size: 20px; margin: 15px 0; color: #0ecb81; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>SMART MONEY</h1>
+        <div class="data" id="status">ПРОВЕРКА СВЯЗИ...</div>
+        <p>Если ты видишь это окно, значит Front-end работает!</p>
+    </div>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        try {
+            window.Telegram.WebApp.ready();
+            document.getElementById('status').innerText = "TERMINAL ACTIVE";
+        } catch (e) {
+            document.getElementById('status').innerText = "BROWSER MODE";
+        }
+    </script>
+</body>
+</html>
