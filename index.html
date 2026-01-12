@@ -1,49 +1,69 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quant Terminal</title>
+    <title>Smart Money Terminal</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { 
-            background-color: #0b0e11; 
-            color: white; 
-            font-family: Arial, sans-serif; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            margin: 0; 
-        }
-        .container {
-            background: #1e2329;
-            padding: 30px;
-            border-radius: 15px;
-            border: 1px solid #30363d;
-            text-align: center;
-            width: 80%;
-        }
-        h1 { color: #f0b90b; margin-bottom: 10px; }
-        .data { font-size: 20px; margin: 15px 0; color: #0ecb81; }
+        body { background: #0b0e11; color: #eaecef; font-family: sans-serif; margin: 0; padding: 10px; overflow-x: hidden; }
+        .card { background: #1e2329; border-radius: 8px; padding: 15px; border: 1px solid #30363d; margin-bottom: 10px; }
+        .row { display: flex; justify-content: space-between; align-items: center; }
+        .price { font-size: 24px; font-weight: bold; color: #f0b90b; }
+        .long { color: #0ecb81; } .short { color: #f6465d; }
+        #chart-container { height: 300px; margin-bottom: 10px; border-radius: 8px; overflow: hidden; border: 1px solid #30363d; }
+        .btn { background: #f0b90b; color: black; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>SMART MONEY</h1>
-        <div class="data" id="status">ПРОВЕРКА СВЯЗИ...</div>
-        <p>Если ты видишь это окно, значит Front-end работает!</p>
+    <div id="chart-container">
+        <div class="tradingview-widget-container">
+            <div id="tradingview_chart"></div>
+        </div>
     </div>
 
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <div class="card">
+        <div class="row">
+            <div>
+                <div style="color: #848e9c; font-size: 12px;">ПОЗИЦИЯ</div>
+                <div id="side" class="long">SEARCHING...</div>
+            </div>
+            <div style="text-align: right;">
+                <div style="color: #848e9c; font-size: 12px;">ЦЕНА ВХОДА</div>
+                <div id="entry">0.00</div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn" onclick="window.Telegram.WebApp.close()">ЗАКРЫТЬ</button>
+
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
-        try {
-            window.Telegram.WebApp.ready();
-            document.getElementById('status').innerText = "TERMINAL ACTIVE";
-        } catch (e) {
-            document.getElementById('status').innerText = "BROWSER MODE";
-        }
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // Настройка графика
+        new TradingView.widget({
+            "autosize": true,
+            "symbol": "BINGX:BTCUSDT",
+            "interval": "15",
+            "timezone": "Etc/UTC",
+            "theme": "dark",
+            "style": "1",
+            "locale": "ru",
+            "container_id": "tradingview_chart",
+            "hide_top_toolbar": true,
+            "hide_legend": true,
+            "save_image": false
+        });
+
+        // Чтение данных из бота
+        const urlParams = new URLSearchParams(window.location.search);
+        document.getElementById('side').innerText = (urlParams.get('side') || 'NONE').toUpperCase();
+        document.getElementById('entry').innerText = urlParams.get('entry') || '0.00';
+        
+        if (urlParams.get('side') === 'short') document.getElementById('side').className = 'short';
     </script>
 </body>
 </html>
