@@ -3,122 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SMC Quantum v2</title>
+    <title>SMC ULTRA</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { 
-            --bg: #080a0c; --card: #12161c; --accent: #f0b90b; 
-            --green: #0ecb81; --red: #f6465d; --text: #eaecef; 
-            --border: #2b3139; --shadow: rgba(0,0,0,0.5);
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 15px; overflow-x: hidden; }
+        :root { --bg: #050505; --card: #111; --accent: #f0b90b; --red: #ff4444; }
+        body { background: var(--bg); color: #fff; font-family: -apple-system, sans-serif; margin: 0; padding: 15px; }
         
-        .screen { display: none; animation: fadeIn 0.3s ease; }
-        .screen.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Жесткое управление экранами */
+        .screen { display: none !important; }
+        .screen.active { display: flex !important; flex-direction: column; }
 
-        /* КНОПКИ МЕНЮ */
-        .main-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
-        .btn-nav { 
-            background: linear-gradient(145deg, #1e2329, #12161c); 
-            border: 1px solid var(--border); color: white; height: 100px; 
-            border-radius: 20px; font-size: 18px; font-weight: 700; cursor: pointer;
-            box-shadow: 0 4px 15px var(--shadow); transition: 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
+        .btn { 
+            background: #1a1a1a; border: 1px solid #333; color: #fff; 
+            padding: 25px; border-radius: 18px; font-size: 18px; font-weight: bold; 
+            margin-bottom: 12px; cursor: pointer; text-align: left;
+            display: flex; justify-content: space-between; align-items: center;
         }
-        .btn-nav:active { transform: scale(0.98); border-color: var(--accent); color: var(--accent); }
+        .btn-gold { border-left: 5px solid var(--accent); }
+        .btn-red { border-left: 5px solid var(--red); }
 
-        /* КАРТОЧКИ */
-        .glass-card { 
-            background: var(--card); border: 1px solid var(--border); 
-            border-radius: 16px; padding: 15px; margin-bottom: 15px;
-            box-shadow: 0 8px 32px var(--shadow);
-        }
+        /* Календарь */
+        .cal-box { background: var(--card); border-radius: 20px; padding: 15px; border: 1px solid #222; }
+        .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 15px; }
+        .day { aspect-ratio: 1; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #444; position: relative; }
+        .day.done { color: #fff; }
+        .day.done::after { content: ''; position: absolute; width: 5px; height: 5px; background: var(--red); border-radius: 50%; bottom: 4px; box-shadow: 0 0 8px var(--red); }
 
-        /* КАЛЕНДАРЬ */
-        .calendar-grid { 
-            display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; 
-            background: #1e2329; padding: 10px; border-radius: 12px; margin-top: 10px;
-        }
-        .cal-day { 
-            aspect-ratio: 1; display: flex; align-items: center; justify-content: center; 
-            font-size: 12px; color: #848e9c; border-radius: 6px; position: relative;
-        }
-        .cal-day.has-analysis::after {
-            content: ''; position: absolute; bottom: 4px; width: 6px; height: 6px; 
-            background: var(--red); border-radius: 50%; box-shadow: 0 0 8px var(--red);
-        }
-        .cal-header { font-weight: bold; color: var(--accent); font-size: 10px; text-transform: uppercase; text-align: center; }
-
-        /* ГРАФИК */
-        #tv_chart { height: 260px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
-
-        /* ВСПОМОГАТЕЛЬНОЕ */
-        .btn-back { background: none; border: none; color: var(--accent); font-weight: bold; cursor: pointer; padding: 10px 0; display: flex; align-items: center; gap: 5px; }
-        .accent-text { color: var(--accent); }
-        .status-badge { padding: 4px 8px; border-radius: 6px; font-size: 12px; background: rgba(240, 185, 11, 0.1); color: var(--accent); border: 1px solid rgba(240, 185, 11, 0.2); }
+        #tv-chart { height: 350px; background: #000; border-radius: 15px; border: 1px solid #222; margin-bottom: 15px; }
+        .back-link { color: var(--accent); padding: 10px 0; cursor: pointer; font-size: 14px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="scr-main" class="screen active">
-        <div style="text-align:center; margin-bottom: 30px;">
-            <h1 style="font-size: 24px; margin: 0; letter-spacing: 1px;">SMC <span class="accent-text">QUANTUM</span></h1>
-            <p style="color: #848e9c; font-size: 14px;">Система контроля дисциплины</p>
-        </div>
+        <h1 style="color: var(--accent); margin-bottom: 30px;">SMC SYSTEM V3</h1>
         
-        <div class="main-grid">
-            <button class="btn-nav" onclick="showScreen('scr-terminal')">📊 ТЕРМИНАЛ</button>
-            <button class="btn-nav" onclick="showScreen('scr-analysis')">🔍 АНАЛИЗ (4H)</button>
-        </div>
+        <button class="btn btn-gold" onclick="nav('scr-analysis')">
+            <span>🔍 НАЧАТЬ АНАЛИЗ 4H</span>
+            <span>→</span>
+        </button>
+
+        <button class="btn btn-red" onclick="nav('scr-calendar')">
+            <span>📅 КАЛЕНДАРЬ ДИСЦИПЛИНЫ</span>
+            <span>→</span>
+        </button>
+
+        <button class="btn" onclick="nav('scr-terminal')">
+            <span>📊 ТОРГОВЫЙ ТЕРМИНАЛ</span>
+            <span>→</span>
+        </button>
     </div>
 
     <div id="scr-terminal" class="screen">
-        <button class="btn-back" onclick="showScreen('scr-main')">← НАЗАД</button>
-        <div id="tv_chart"></div>
-        <div class="glass-card">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div><div style="font-size: 10px; color:#848e9c;">ТЕКУЩИЙ СИГНАЛ</div><div id="side-ui" style="font-size: 20px; font-weight: bold;">WAIT</div></div>
-                <div><div style="font-size: 10px; color:#848e9c;">ЦЕНА ВХОДА</div><div id="entry-ui" style="font-size: 20px; font-weight: bold; font-family: monospace;">0.00</div></div>
+        <div class="back-link" onclick="nav('scr-main')">← НАЗАД В МЕНЮ</div>
+        <div id="tv-chart"></div>
+    </div>
+
+    <div id="scr-calendar" class="screen">
+        <div class="back-link" onclick="nav('scr-main')" style="color: var(--red);">← НАЗАД В МЕНЮ</div>
+        <div class="cal-box">
+            <div style="display: flex; justify-content: space-between;">
+                <b>Январь 2026</b>
+                <span style="color: var(--red);">80% Стрик</span>
             </div>
+            <div class="grid" id="cal-render"></div>
         </div>
     </div>
 
     <div id="scr-analysis" class="screen">
-        <button class="btn-back" onclick="showScreen('scr-main')">← НАЗАД</button>
-        
-        <div id="analysis-flow">
-            <div id="a1" class="glass-card">
-                <h3>Ежедневная рутина</h3>
-                <p style="color: #848e9c; font-size: 14px;">Проверьте структуру на 4H таймфрейме перед поиском входа.</p>
-                <button class="btn-nav" style="height: 60px; font-size: 16px; background: var(--accent); color: black;" onclick="nextStep(2)">НАЧАТЬ АНАЛИЗ</button>
-                <button class="btn-nav" style="height: 50px; font-size: 14px; margin-top: 10px;" onclick="toggleHistory()">📅 ИСТОРИЯ И КАЛЕНДАРЬ</button>
-            </div>
-
-            <div id="a2" class="glass-card" style="display:none;">
-                <h3>Текущая фаза рынка</h3>
-                <button class="btn-nav" style="height: 60px;" onclick="finish('Коррекция', 'Ожидание')">КОРРЕКЦИЯ</button>
-                <button class="btn-nav" style="height: 60px; color: var(--green);" onclick="nextStep(3)">ИМПУЛЬС</button>
-            </div>
-
-            <div id="a3" class="glass-card" style="display:none;">
-                <h3>Поиск входа (LTF)</h3>
-                <button class="btn-nav" style="height: 60px; color: var(--green);" onclick="finish('Импульс', 'Поиск входа')">ЕСТЬ ПОДТВЕРЖДЕНИЕ</button>
-                <button class="btn-nav" style="height: 60px;" onclick="finish('Импульс', 'Ожидание')">НЕТ ВХОДА</button>
-            </div>
-        </div>
-
-        <div id="history-view" style="display:none;">
-            <div class="glass-card">
-                <div style="display:flex; justify-content: space-between;">
-                    <span style="font-weight:bold;">Январь 2026</span>
-                    <span class="status-badge" onclick="toggleHistory()">К АНАЛИЗУ</span>
-                </div>
-                <div class="calendar-grid" id="calendar-days">
-                    </div>
-            </div>
-            <div id="log-list"></div>
+        <div class="back-link" onclick="nav('scr-main')">← ОТМЕНА</div>
+        <div class="cal-box">
+            <h2>Шаг 1: Анализ 4H</h2>
+            <p style="color: #888;">Проверь наличие импульса или слома структуры на графике.</p>
+            <button class="btn btn-gold" style="width: 100%; margin-top: 20px;" onclick="finish('Импульс')">ЕСТЬ ИМПУЛЬС</button>
+            <button class="btn" style="width: 100%;" onclick="finish('Коррекция')">КОРРЕКЦИЯ</button>
         </div>
     </div>
 
@@ -127,55 +85,33 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        function showScreen(id) {
+        function nav(id) {
+            // Прячем абсолютно все экраны
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+            // Показываем нужный
+            const target = document.getElementById(id);
+            if(target) target.classList.add('active');
+
             if(id === 'scr-terminal') {
-                new TradingView.widget({ "autosize": true, "symbol": "BINANCE:BTCUSDT", "interval": "15", "theme": "dark", "container_id": "tv_chart", "hide_top_toolbar": true });
+                new TradingView.widget({
+                    "autosize": true, "symbol": "BINANCE:BTCUSDT", "interval": "15",
+                    "theme": "dark", "container_id": "tv-chart", "hide_top_toolbar": true
+                });
+            }
+            if(id === 'scr-calendar') {
+                const box = document.getElementById('cal-render');
+                box.innerHTML = '';
+                for(let i = 1; i <= 31; i++) {
+                    let mark = (i >= 10 && i <= 13) ? 'done' : '';
+                    box.innerHTML += `<div class="day ${mark}">${i}</div>`;
+                }
             }
         }
 
-        function nextStep(n) {
-            document.getElementById('a1').style.display = 'none';
-            document.getElementById('a2').style.display = 'none';
-            document.getElementById('a3').style.display = 'none';
-            document.getElementById('a' + n).style.display = 'block';
-        }
-
-        function toggleHistory() {
-            const flow = document.getElementById('analysis-flow');
-            const history = document.getElementById('history-view');
-            if(flow.style.display === 'none') {
-                flow.style.display = 'block';
-                history.style.display = 'none';
-            } else {
-                flow.style.display = 'none';
-                history.style.display = 'block';
-                renderCalendar();
-            }
-        }
-
-        function finish(p, s) {
-            tg.sendData(JSON.stringify({type: 'analysis', phase: p, status: s}));
+        function finish(phase) {
+            tg.sendData(JSON.stringify({type: 'analysis', phase: phase}));
             tg.close();
         }
-
-        function renderCalendar() {
-            const grid = document.getElementById('calendar-days');
-            grid.innerHTML = '';
-            const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-            days.forEach(d => grid.innerHTML += `<div class="cal-header">${d}</div>`);
-            
-            // Заглушка: закрашиваем "сегодня" для примера (13-е число)
-            for(let i = 1; i <= 31; i++) {
-                let activeClass = (i === 13) ? 'has-analysis' : '';
-                grid.innerHTML += `<div class="cal-day ${activeClass}">${i}</div>`;
-            }
-        }
-
-        const p = new URLSearchParams(window.location.search);
-        document.getElementById('side-ui').innerText = p.get('side') || 'WAIT';
-        document.getElementById('entry-ui').innerText = p.get('entry') || '0.00';
     </script>
 </body>
 </html>
