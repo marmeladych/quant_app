@@ -2,103 +2,94 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SMC System</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #0b0e11; --card: #161a1e; --accent: #f0b90b; --green: #0ecb81; --red: #f6465d; --text-dim: #848e9c; }
-        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; padding: 15px; }
-        .hidden { display: none !important; }
-        .card { background: var(--card); border: 1px solid #2b3139; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        :root { --bg: #0b0e11; --card: #161a1e; --accent: #f0b90b; --green: #0ecb81; --red: #f6465d; }
+        body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; padding: 15px; }
         
-        /* ГЛАВНЫЕ КНОПКИ */
-        .btn-nav { background: #2b3139; color: white; border: 1px solid #474d57; width: 100%; height: 120px; border-radius: 16px; font-size: 20px; font-weight: bold; margin-bottom: 20px; display: block; }
-        .btn-nav:active { border-color: var(--accent); color: var(--accent); }
-        
-        .btn-step { background: #2b3139; color: white; border: 1px solid #474d57; width: 100%; padding: 18px; border-radius: 12px; margin-top: 12px; font-weight: bold; font-size: 16px; }
-        #chart-container { height: 300px; border-radius: 12px; overflow: hidden; border: 1px solid #2b3139; margin-bottom: 15px; }
-        .label { color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
-        .value { font-family: 'Roboto Mono', monospace; font-size: 18px; font-weight: bold; }
-        .long { color: var(--green); } .short { color: var(--red); }
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        .btn-nav { 
+            background: #2b3139; color: white; border: 1px solid #474d57; 
+            width: 100%; height: 80px; border-radius: 12px; 
+            font-size: 18px; font-weight: bold; margin-bottom: 15px; cursor: pointer;
+        }
+        .card { background: var(--card); border: 1px solid #2b3139; border-radius: 10px; padding: 15px; margin-bottom: 10px; }
+        #chart { height: 300px; border-radius: 10px; border: 1px solid #2b3139; }
+        .step-btn { background: var(--accent); color: black; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="screen-main">
-        <h2 style="text-align: center; margin-bottom: 30px; letter-spacing: 2px;">SMC SYSTEM</h2>
-        <button class="btn-nav" onclick="showScreen('screen-terminal')">📊 ТЕРМИНАЛ</button>
-        <button class="btn-nav" onclick="showScreen('screen-analysis')">🔍 АНАЛИЗ (4H)</button>
+    <div id="main-menu" class="screen active">
+        <h2 style="text-align: center;">SMC TERMINAL</h2>
+        <button class="btn-nav" onclick="show('terminal-screen')">📊 ТЕРМИНАЛ</button>
+        <button class="btn-nav" onclick="show('analysis-screen')">🔍 АНАЛИЗ (4H)</button>
     </div>
 
-    <div id="screen-terminal" class="hidden">
-        <button class="btn-step" style="width: auto; padding: 8px 15px;" onclick="showScreen('screen-main')">← НАЗАД</button>
-        <div id="chart-container" style="margin-top:15px;"><div id="tradingview_chart" style="height: 100%;"></div></div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div class="card"><div class="label">Позиция</div><div id="side" class="value">WAIT</div></div>
-            <div class="card"><div class="label">Вход</div><div id="entry" class="value">0.00</div></div>
-        </div>
-        <div class="card">
+    <div id="terminal-screen" class="screen">
+        <button onclick="show('main-menu')" style="color:var(--accent); background:none; border:none; padding:10px;">← НАЗАД</button>
+        <div id="chart"></div>
+        <div class="card" style="margin-top:10px;">
             <div style="display: flex; justify-content: space-between;">
-                <div><div class="label">Take Profit</div><div id="tp" class="value long">0.00</div></div>
-                <div><div class="label">Stop Loss</div><div id="sl" class="value short">0.00</div></div>
+                <span>SIDE: <b id="side-val">-</b></span>
+                <span>ENTRY: <b id="entry-val">0.00</b></span>
             </div>
         </div>
     </div>
 
-    <div id="screen-analysis" class="hidden">
-        <button class="btn-step" style="width: auto; padding: 8px 15px;" onclick="showScreen('screen-main')">← НАЗАД</button>
-        
-        <div id="step-1" class="card" style="margin-top:15px;">
-            <p style="text-align:center; font-size: 18px;">Анализ выполнен?</p>
-            <button class="btn-step" style="border-color: var(--accent); color: var(--accent);" onclick="nextStep(2)">ДА</button>
+    <div id="analysis-screen" class="screen">
+        <button onclick="show('main-menu')" style="color:var(--accent); background:none; border:none; padding:10px;">← НАЗАД</button>
+        <div id="a-step-1" class="card">
+            <p>Выполнили анализ структуры?</p>
+            <button class="step-btn" onclick="next(2)">ДА, ИДЕМ ДАЛЬШЕ</button>
         </div>
-
-        <div id="step-2" class="card hidden">
-            <p style="text-align:center; font-size: 18px;">Фаза 4H:</p>
-            <button class="btn-step" onclick="submitAnalysis('Коррекция 4H', 'Режим ожидания')">ФАЗА КОРРЕКЦИИ</button>
-            <button class="btn-step" style="color: var(--green);" onclick="nextStep(3)">ФАЗА ИМПУЛЬСА</button>
+        <div id="a-step-2" class="card" style="display:none;">
+            <p>Фаза рынка 4H:</p>
+            <button class="step-btn" onclick="send('Коррекция 4H', 'Ожидание')">КОРРЕКЦИЯ</button>
+            <button class="step-btn" style="background:#0ecb81" onclick="next(3)">ИМПУЛЬС</button>
         </div>
-
-        <div id="step-3" class="card hidden">
-            <p style="text-align:center; font-size: 18px;">Вход возможен?</p>
-            <button class="btn-step" style="color: var(--green);" onclick="submitAnalysis('Импульс 4H', 'Поиск входа')">ВОЗМОЖЕН</button>
-            <button class="btn-step" onclick="submitAnalysis('Импульс 4H', 'Режим ожидания')">НЕВОЗМОЖЕН</button>
+        <div id="a-step-3" class="card" style="display:none;">
+            <p>Вход подтвержден?</p>
+            <button class="step-btn" style="background:#0ecb81" onclick="send('Импульс 4H', 'Поиск входа')">ДА</button>
+            <button class="step-btn" onclick="send('Импульс 4H', 'Ожидание')">НЕТ</button>
         </div>
     </div>
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
-        let tg = window.Telegram.WebApp;
+        const tg = window.Telegram.WebApp;
         tg.expand();
 
-        function showScreen(s) {
-            document.getElementById('screen-main').classList.add('hidden');
-            document.getElementById('screen-terminal').classList.add('hidden');
-            document.getElementById('screen-analysis').classList.add('hidden');
-            document.getElementById(s).classList.remove('hidden');
-            if(s === 'screen-terminal') {
-                new TradingView.widget({ "autosize": true, "symbol": "BINANCE:BTCUSDT", "interval": "15", "theme": "dark", "container_id": "tradingview_chart", "hide_top_toolbar": true });
+        function show(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(id === 'terminal-screen') {
+                new TradingView.widget({
+                    "autosize": true, "symbol": "BINANCE:BTCUSDT", "interval": "15",
+                    "theme": "dark", "container_id": "chart", "hide_top_toolbar": true
+                });
             }
         }
 
-        function nextStep(n) {
-            document.getElementById('step-1').classList.add('hidden');
-            document.getElementById('step-2').classList.add('hidden');
-            document.getElementById('step-3').classList.add('hidden');
-            document.getElementById('step-'+n).classList.remove('hidden');
+        function next(step) {
+            document.getElementById('a-step-1').style.display = 'none';
+            document.getElementById('a-step-2').style.display = 'none';
+            document.getElementById('a-step-3').style.display = 'none';
+            document.getElementById('a-step-' + step).style.display = 'block';
         }
 
-        function submitAnalysis(phase, status) {
-            tg.sendData(JSON.stringify({type: 'analysis', phase: phase, status: status}));
+        function send(p, s) {
+            tg.sendData(JSON.stringify({type: 'analysis', phase: p, status: s}));
             tg.close();
         }
 
-        const params = new URLSearchParams(window.location.search);
-        document.getElementById('side').innerText = (params.get('side') || 'WAIT').toUpperCase();
-        document.getElementById('entry').innerText = params.get('entry') || '0.00';
-        document.getElementById('sl').innerText = params.get('sl') || '0.00';
-        document.getElementById('tp').innerText = params.get('tp') || '0.00';
+        const urlParams = new URLSearchParams(window.location.search);
+        document.getElementById('side-val').innerText = urlParams.get('side') || 'WAIT';
+        document.getElementById('entry-val').innerText = urlParams.get('entry') || '0.00';
     </script>
 </body>
 </html>
