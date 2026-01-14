@@ -3,113 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SMC ULTRA</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #050505; --card: #111; --accent: #f0b90b; --red: #ff4444; }
-        body { background: var(--bg); color: #fff; font-family: -apple-system, sans-serif; margin: 0; padding: 15px; }
+        :root { --bg: #000; --card: #111; --accent: #f0b90b; --red: #ff4444; --border: #222; }
+        body { background: var(--bg); color: #fff; font-family: -apple-system, sans-serif; margin: 0; padding: 0; overflow: hidden; }
         
-        /* Жесткое управление экранами */
-        .screen { display: none !important; }
-        .screen.active { display: flex !important; flex-direction: column; }
+        .screen { display: none; flex-direction: column; height: 100vh; padding: 15px; box-sizing: border-box; }
+        .active { display: flex; }
 
-        .btn { 
-            background: #1a1a1a; border: 1px solid #333; color: #fff; 
-            padding: 25px; border-radius: 18px; font-size: 18px; font-weight: bold; 
-            margin-bottom: 12px; cursor: pointer; text-align: left;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .btn-gold { border-left: 5px solid var(--accent); }
-        .btn-red { border-left: 5px solid var(--red); }
+        /* Навигация */
+        .btn-main { background: var(--card); border: 1px solid var(--border); color: #fff; padding: 20px; border-radius: 15px; margin-bottom: 10px; font-size: 18px; font-weight: bold; text-align: left; display: flex; justify-content: space-between; border-left: 5px solid var(--accent); }
+        .btn-sub { background: var(--card); border: 1px solid var(--border); color: #ccc; padding: 15px; border-radius: 12px; font-size: 14px; font-weight: bold; flex: 1; }
+
+        /* Терминал: График */
+        #tv-chart { flex-grow: 1; border: 1px solid var(--border); border-radius: 12px; }
+        .notes { background: #000; border: 1px solid var(--border); color: #fff; padding: 10px; height: 60px; border-radius: 8px; margin-top: 10px; resize: none; font-size: 12px; }
 
         /* Календарь */
-        .cal-box { background: var(--card); border-radius: 20px; padding: 15px; border: 1px solid #222; }
-        .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 15px; }
-        .day { aspect-ratio: 1; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #444; position: relative; }
-        .day.done { color: #fff; }
-        .day.done::after { content: ''; position: absolute; width: 5px; height: 5px; background: var(--red); border-radius: 50%; bottom: 4px; box-shadow: 0 0 8px var(--red); }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 15px; }
+        .day { aspect-ratio: 1; background: #151515; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #444; }
+        .day.done { border: 1px solid var(--red); color: #fff; box-shadow: 0 0 10px rgba(255, 68, 68, 0.3); }
 
-        #tv-chart { height: 350px; background: #000; border-radius: 15px; border: 1px solid #222; margin-bottom: 15px; }
-        .back-link { color: var(--accent); padding: 10px 0; cursor: pointer; font-size: 14px; font-weight: bold; }
+        /* Инфо */
+        .info-card { background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 10px; border: 1px solid var(--border); }
+        .news-item { font-size: 13px; color: #bbb; padding: 8px 0; border-bottom: 1px solid #222; }
+        .back { color: var(--accent); font-weight: bold; margin-bottom: 15px; cursor: pointer; display: block; }
     </style>
 </head>
 <body>
 
     <div id="scr-main" class="screen active">
-        <h1 style="color: var(--accent); margin-bottom: 30px;">SMC SYSTEM V3</h1>
+        <h1 style="font-size: 28px; margin-bottom: 25px;">SMC <span style="color:var(--accent)">QUANTUM</span></h1>
+        <button class="btn-main" onclick="nav('scr-analysis')">🔍 ВЫПОЛНИТЬ АНАЛИЗ <span>→</span></button>
+        <button class="btn-main" style="border-left-color: var(--red)" onclick="nav('scr-info')">🌍 ИНФО И НОВОСТИ <span>→</span></button>
         
-        <button class="btn btn-gold" onclick="nav('scr-analysis')">
-            <span>🔍 НАЧАТЬ АНАЛИЗ 4H</span>
-            <span>→</span>
-        </button>
-
-        <button class="btn btn-red" onclick="nav('scr-calendar')">
-            <span>📅 КАЛЕНДАРЬ ДИСЦИПЛИНЫ</span>
-            <span>→</span>
-        </button>
-
-        <button class="btn" onclick="nav('scr-terminal')">
-            <span>📊 ТОРГОВЫЙ ТЕРМИНАЛ</span>
-            <span>→</span>
-        </button>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn-sub" onclick="nav('scr-terminal')">📊 ТЕРМИНАЛ</button>
+            <button class="btn-sub" onclick="nav('scr-calendar')">📅 КАЛЕНДАРЬ</button>
+        </div>
     </div>
 
     <div id="scr-terminal" class="screen">
-        <div class="back-link" onclick="nav('scr-main')">← НАЗАД В МЕНЮ</div>
+        <span class="back" onclick="nav('scr-main')">← НАЗАД</span>
         <div id="tv-chart"></div>
+        <textarea class="notes" id="note-box" placeholder="Заметки на сегодня..." oninput="localStorage.setItem('smc_note', this.value)"></textarea>
     </div>
 
     <div id="scr-calendar" class="screen">
-        <div class="back-link" onclick="nav('scr-main')" style="color: var(--red);">← НАЗАД В МЕНЮ</div>
-        <div class="cal-box">
-            <div style="display: flex; justify-content: space-between;">
-                <b>Январь 2026</b>
-                <span style="color: var(--red);">80% Стрик</span>
-            </div>
-            <div class="grid" id="cal-render"></div>
+        <span class="back" onclick="nav('scr-main')">← НАЗАД</span>
+        <div class="info-card">
+            <h3>Январь 2026</h3>
+            <div id="cal-render" class="cal-grid"></div>
+        </div>
+    </div>
+
+    <div id="scr-info" class="screen" style="overflow-y: auto;">
+        <span class="back" onclick="nav('scr-main')">← НАЗАД</span>
+        
+        <div class="info-card">
+            <small style="color: #888;">FEAR & GREED INDEX</small>
+            <div id="fng-val" style="font-size: 24px; font-weight: bold; color: var(--accent);">...</div>
+        </div>
+
+        <div class="info-card">
+            <small style="color: #888;">TRUMP NEWS (AUTO-PARSED)</small>
+            <div id="trump-feed"></div>
         </div>
     </div>
 
     <div id="scr-analysis" class="screen">
-        <div class="back-link" onclick="nav('scr-main')">← ОТМЕНА</div>
-        <div class="cal-box">
-            <h2>Шаг 1: Анализ 4H</h2>
-            <p style="color: #888;">Проверь наличие импульса или слома структуры на графике.</p>
-            <button class="btn btn-gold" style="width: 100%; margin-top: 20px;" onclick="finish('Импульс')">ЕСТЬ ИМПУЛЬС</button>
-            <button class="btn" style="width: 100%;" onclick="finish('Коррекция')">КОРРЕКЦИЯ</button>
+        <span class="back" onclick="nav('scr-main')">← ОТМЕНА</span>
+        <div class="info-card" style="text-align: center; margin-top: 50px;">
+            <h2>Анализ 4H</h2>
+            <p style="color: #888;">Вы подтверждаете выполнение ежедневного анализа структуры?</p>
+            <button class="btn-main" style="width:100%; text-align:center; background:var(--accent); color:#000;" onclick="submitAnalysis()">ПОДТВЕРДИТЬ</button>
         </div>
     </div>
 
-    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script src="https://s3.tradingview.com/tv.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
+        const params = new URLSearchParams(window.location.search);
+        const history = (params.get('dates') || "").split(',');
+        const trumpPosts = (params.get('posts') || "").split('|');
+
         function nav(id) {
-            // Прячем абсолютно все экраны
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            // Показываем нужный
-            const target = document.getElementById(id);
-            if(target) target.classList.add('active');
+            document.getElementById(id).classList.add('active');
 
             if(id === 'scr-terminal') {
                 new TradingView.widget({
                     "autosize": true, "symbol": "BINANCE:BTCUSDT", "interval": "15",
-                    "theme": "dark", "container_id": "tv-chart", "hide_top_toolbar": true
+                    "theme": "dark", "container_id": "tv-chart", "hide_top_toolbar": false,
+                    "withdateranges": true, "allow_symbol_change": true
                 });
+                document.getElementById('note-box').value = localStorage.getItem('smc_note') || '';
             }
-            if(id === 'scr-calendar') {
-                const box = document.getElementById('cal-render');
-                box.innerHTML = '';
-                for(let i = 1; i <= 31; i++) {
-                    let mark = (i >= 10 && i <= 13) ? 'done' : '';
-                    box.innerHTML += `<div class="day ${mark}">${i}</div>`;
-                }
+            if(id === 'scr-calendar') renderCalendar();
+            if(id === 'scr-info') {
+                loadFNG();
+                renderTrump();
             }
         }
 
-        function finish(phase) {
-            tg.sendData(JSON.stringify({type: 'analysis', phase: phase}));
+        function renderCalendar() {
+            const grid = document.getElementById('cal-render');
+            grid.innerHTML = '';
+            const now = new Date();
+            const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            for(let i=1; i<=days; i++) {
+                const dateStr = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${i.toString().padStart(2,'0')}`;
+                let cls = history.includes(dateStr) ? 'day done' : 'day';
+                grid.innerHTML += `<div class="${cls}">${i}</div>`;
+            }
+        }
+
+        function loadFNG() {
+            fetch('https://api.alternative.me/fng/').then(r => r.json()).then(d => {
+                document.getElementById('fng-val').innerText = d.data[0].value + ' (' + d.data[0].value_classification + ')';
+            });
+        }
+
+        function renderTrump() {
+            const f = document.getElementById('trump-feed');
+            f.innerHTML = trumpPosts.map(p => `<div class="news-item">🔹 ${p}</div>`).join('');
+        }
+
+        function submitAnalysis() {
+            tg.sendData(JSON.stringify({action: 'analysis_done'}));
             tg.close();
         }
     </script>
