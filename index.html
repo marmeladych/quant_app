@@ -10,28 +10,23 @@
         .screen { display: none; flex-direction: column; height: 100vh; padding: 10px; box-sizing: border-box; overflow-y: auto; }
         .active { display: flex; }
 
-        /* Status Bar */
-        .trade-status { background: #0a0a0a; border: 1px solid var(--accent); border-radius: 12px; padding: 12px; margin-bottom: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; }
-        .trade-status div { font-size: 10px; color: #666; }
-        .trade-status b { display: block; font-size: 15px; color: var(--accent); margin-top: 4px; }
+        /* Trade Status Card */
+        .trade-status { background: #0a0a0a; border: 1px solid var(--accent); border-radius: 12px; padding: 12px; margin-bottom: 15px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; text-align: center; }
+        .trade-status div { font-size: 10px; color: #666; text-transform: uppercase; }
+        .trade-status b { display: block; font-size: 14px; color: var(--accent); margin-top: 4px; }
 
-        /* Buttons */
         .btn-main { background: var(--card); border: 1px solid var(--border); color: #fff; padding: 18px; border-radius: 12px; margin-bottom: 10px; font-weight: bold; text-align: left; display: flex; justify-content: space-between; border-left: 5px solid var(--accent); width: 100%; font-size: 15px; cursor: pointer; }
         
-        /* Calendar */
-        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
         .day { aspect-ratio: 1; background: #0a0a0a; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1px solid #1a1a1a; color: #444; }
-        .day.done { background: var(--red) !important; color: #fff; border: none; box-shadow: 0 0 10px var(--red); font-weight: bold; }
+        .day.done { background: var(--red) !important; color: #fff; border: none; box-shadow: 0 0 10px var(--red); }
         .day.today { border: 1px solid var(--accent); color: var(--accent); }
 
-        /* Info & Terminal */
-        .widget-box { background: var(--card); border-radius: 15px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 15px; height: 450px; position: relative; }
-        .trump-post { background: #050505; border-left: 3px solid #333; padding: 12px; margin-bottom: 8px; font-size: 13px; color: #eee; border-radius: 0 8px 8px 0; }
+        .widget-box { background: var(--card); border-radius: 15px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 15px; height: 350px; }
         .back { color: var(--accent); font-weight: bold; margin-bottom: 15px; display: block; cursor: pointer; }
         
         #tv-chart { flex-grow: 1; border: 1px solid var(--border); border-radius: 12px; min-height: 350px; }
-        .notes { background: #000; border: 1px solid var(--border); color: #fff; padding: 10px; height: 60px; border-radius: 8px; margin-top: 10px; width: 100%; box-sizing: border-box; resize: none; font-size: 12px; }
+        input { background: #000; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 8px; margin-top: 5px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -40,89 +35,71 @@
         <h1 style="font-size: 24px; margin: 15px 0;">SMC <span style="color:var(--accent)">QUANTUM</span></h1>
         
         <div class="trade-status">
-            <div>SIDE<b>LONG</b></div>
-            <div>ENTRY<b>69,120</b></div>
-            <div>STATUS<b>WAIT</b></div>
+            <div>Текущая Фаза<b id="st-phase">ОЖИДАНИЕ</b></div>
+            <div>Статус Сделки<b id="st-deal">НЕТ СДЕЛКИ</b></div>
+            <div style="grid-column: span 2;">Детали<b id="st-details">-</b></div>
         </div>
 
-        <button class="btn-main" onclick="nav('scr-analysis')">🔍 АНАЛИЗ СТРУКТУРЫ 4H <span>→</span></button>
-        <button class="btn-main" style="border-left-color: var(--red)" onclick="nav('scr-info')">🌍 НОВОСТИ И ТРАМП <span>→</span></button>
+        <button class="btn-main" onclick="nav('scr-analysis')">🔍 АНАЛИЗ / СДЕЛКА <span>→</span></button>
+        <button class="btn-main" style="border-left-color: var(--red)" onclick="nav('scr-info')">🌍 ИНФО И НОВОСТИ <span>→</span></button>
         
         <div style="display: flex; gap: 8px;">
-            <button style="flex:1;" class="btn-main" onclick="nav('scr-terminal')">📊 CHART</button>
-            <button style="flex:1;" class="btn-main" onclick="nav('scr-calendar')">📅 CAL</button>
-        </div>
-    </div>
-
-    <div id="scr-terminal" class="screen">
-        <span class="back" onclick="nav('scr-main')">← BACK</span>
-        <div id="tv-chart"></div>
-        <textarea class="notes" id="note-box" placeholder="HTF Context / LTF Entry..." oninput="localStorage.setItem('smc_note', this.value)"></textarea>
-    </div>
-
-    <div id="scr-calendar" class="screen">
-        <span class="back" onclick="nav('scr-main')">← BACK</span>
-        <div style="background:var(--card); padding:15px; border-radius:15px; border:1px solid var(--border);">
-            <div class="cal-header">
-                <button onclick="changeMonth(-1)" style="color:#fff; background:none; border:none; font-size:20px;">❮</button>
-                <b id="month-name"></b>
-                <button onclick="changeMonth(1)" style="color:#fff; background:none; border:none; font-size:20px;">❯</button>
-            </div>
-            <div id="cal-render" class="cal-grid"></div>
-        </div>
-    </div>
-
-    <div id="scr-info" class="screen">
-        <span class="back" onclick="nav('scr-main')">← BACK</span>
-        
-        <div class="widget-box" id="econ-calendar-container">
-            </div>
-
-        <div style="margin-top: 10px;">
-            <small style="color:var(--accent); text-transform: uppercase; font-weight: bold;">Trump Statements</small>
-            <div id="trump-feed" style="margin-top: 10px;"></div>
+            <button style="flex:1;" class="btn-main" onclick="nav('scr-terminal')">📊 ГРАФИК</button>
+            <button style="flex:1;" class="btn-main" onclick="nav('scr-calendar')">📅 КАЛЕНДАРЬ</button>
         </div>
     </div>
 
     <div id="scr-analysis" class="screen">
-        <span class="back" onclick="nav('scr-main')">← BACK</span>
-        <div style="background:var(--card); padding:25px; border-radius:20px; text-align:center; border:1px solid #333; margin-top: 20%;">
-            <h2>Daily Analysis</h2>
-            <p style="color: #888;">Подтверждаете выполнение разбора?</p>
-            <button id="conf-btn" class="btn-main" style="background:var(--accent); color:#000; justify-content:center; border:none;" onclick="handleConfirm()">ДА, ВЫПОЛНЕНО</button>
-            <p id="conf-msg" style="display:none; color:var(--accent); font-weight:bold;">МГНОВЕННО СОХРАНЕНО ✅</p>
-        </div>
+        <span class="back" onclick="nav('scr-main')">← НАЗАД</span>
+        <div id="analysis-flow">
+            </div>
     </div>
+
+    <div id="scr-info" class="screen">
+        <span class="back" onclick="nav('scr-main')">← НАЗАД</span>
+        
+        <div style="background:var(--card); padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid var(--border);">
+            <small style="color:#888;">INDEX FEAR & GREED</small>
+            <div id="fng-val" style="font-size: 22px; font-weight: bold; color: var(--accent); margin-top:5px;">...</div>
+        </div>
+
+        <div class="widget-box" id="econ-calendar-container"></div>
+
+        <button class="btn-main" onclick="window.open('https://t.me/realDonaldTrump_rus', '_blank')" style="border-left-color: #0088cc;">
+            📢 МОНИТОРИНГ ТРАМПА (ПЕРЕЙТИ) <span>→</span>
+        </button>
+    </div>
+
+    <div id="scr-terminal" class="screen"><span class="back" onclick="nav('scr-main')">← BACK</span><div id="tv-chart"></div></div>
+    <div id="scr-calendar" class="screen"><span class="back" onclick="nav('scr-main')">← BACK</span><div id="cal-render" class="cal-grid"></div></div>
 
     <script src="https://s3.tradingview.com/tv.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        let currentDate = new Date();
-        const params = new URLSearchParams(window.location.search);
-        let history = (params.get('dates') || "").split(',').filter(d => d !== "");
-        const trumpPosts = (params.get('posts') || "").split('|');
+        let state = {
+            phase: 'Ожидание', 
+            dealStatus: 'Нет сделки',
+            details: '-',
+            history: (new URLSearchParams(window.location.search).get('dates') || "").split(',').filter(d => d)
+        };
 
         function nav(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            
-            if(id === 'scr-terminal') {
-                new TradingView.widget({
-                    "autosize": true, "symbol": "BINANCE:BTCUSDT", "interval": "15",
-                    "theme": "dark", "container_id": "tv-chart", "hide_top_toolbar": false,
-                    "locale": "ru"
-                });
-            }
+            if(id === 'scr-info') { loadFNG(); initEconWidget(); }
+            if(id === 'scr-terminal') new TradingView.widget({"autosize": true, "symbol": "BINANCE:BTCUSDT", "interval": "15", "theme": "dark", "container_id": "tv-chart"});
             if(id === 'scr-calendar') renderCalendar();
-            if(id === 'scr-info') {
-                renderTrump();
-                initEconWidget();
-            }
+            if(id === 'scr-analysis') showAnalysisStep('init');
         }
 
-        // Рендер виджета БЕЗ ошибок двоеточия (через динамический скрипт)
+        function loadFNG() {
+            fetch('https://api.alternative.me/fng/').then(r => r.json()).then(d => {
+                document.getElementById('fng-val').innerText = d.data[0].value + ' (' + d.data[0].value_classification + ')';
+            });
+        }
+
         function initEconWidget() {
             const container = document.getElementById('econ-calendar-container');
             container.innerHTML = '';
@@ -130,55 +107,98 @@
             script.type = 'text/javascript';
             script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-events.js';
             script.async = true;
-            script.text = JSON.stringify({
-                colorTheme: "dark",
-                isMaximized: true,
-                width: "100%",
-                height: "100%",
-                locale: "ru",
-                importanceFilter: "-1,0,1",
-                currencyFilter: "USD,EUR"
-            });
+            script.text = JSON.stringify({ colorTheme: "dark", isMaximized: true, width: "100%", height: "100%", locale: "ru", importanceFilter: "-1,0,1", currencyFilter: "USD,EUR" });
             container.appendChild(script);
+        }
+
+        // --- ЛОГИКА ОПРОСА ---
+        function showAnalysisStep(step) {
+            const flow = document.getElementById('analysis-flow');
+            if(step === 'init') {
+                flow.innerHTML = `
+                    <h3>Какая сейчас фаза?</h3>
+                    <button class="btn-main" onclick="updateTradeState('Коррекция'); showAnalysisStep('correction')">ФАЗА КОРРЕКЦИИ</button>
+                    <button class="btn-main" onclick="updateTradeState('Импульс'); showAnalysisStep('impulse')">ФАЗА ИМПУЛЬСА</button>
+                `;
+            } else if(step === 'impulse') {
+                flow.innerHTML = `
+                    <div style="background:var(--card); padding:15px; border-radius:12px;">
+                        <p>Статус: В ОЖИДАНИИ (Импульс)</p>
+                        <button class="btn-main" onclick="updateTradeState('Коррекция'); showAnalysisStep('correction')">ПЕРЕШЛИ В КОРРЕКЦИЮ</button>
+                        <button class="btn-main" onclick="confirmDay()">ПОДТВЕРДИТЬ АНАЛИЗ И ВЫЙТИ</button>
+                    </div>
+                `;
+            } else if(step === 'correction') {
+                flow.innerHTML = `
+                    <div style="background:var(--card); padding:15px; border-radius:12px;">
+                        <p>Статус: ОЖИДАНИЕ ВХОДА</p>
+                        <button class="btn-main" onclick="showAnalysisStep('entry-form')">БЫЛ ВХОД</button>
+                        <button class="btn-main" onclick="confirmDay()">ВХОДА НЕ БЫЛО (ВЫЙТИ)</button>
+                    </div>
+                `;
+            } else if(step === 'entry-form') {
+                flow.innerHTML = `
+                    <h3>Детали сделки</h3>
+                    <input id="in-entry" type="text" placeholder="Цена входа">
+                    <input id="in-sl" type="text" placeholder="Стоп лосс">
+                    <input id="in-tp" type="text" placeholder="Тейк профит">
+                    <input id="in-rr" type="text" placeholder="RR (напр. 1:3)">
+                    <button class="btn-main" style="background:var(--accent); color:#000; justify-content:center;" onclick="saveDeal()">СОХРАНИТЬ СДЕЛКУ</button>
+                `;
+            }
+        }
+
+        function updateTradeState(phase) {
+            state.phase = phase;
+            state.dealStatus = phase === 'Импульс' ? 'Ожидание' : 'Поиск входа';
+            updateUI();
+        }
+
+        function saveDeal() {
+            const entry = document.getElementById('in-entry').value;
+            const sl = document.getElementById('in-sl').value;
+            const tp = document.getElementById('in-tp').value;
+            const rr = document.getElementById('in-rr').value;
+            state.dealStatus = 'В СДЕЛКЕ';
+            state.details = `E: ${entry} | SL: ${sl} | RR: ${rr}`;
+            updateUI();
+            confirmDay();
+        }
+
+        function updateUI() {
+            document.getElementById('st-phase').innerText = state.phase;
+            document.getElementById('st-deal').innerText = state.dealStatus;
+            document.getElementById('st-details').innerText = state.details;
+        }
+
+        function confirmDay() {
+            const today = new Date().toISOString().slice(0,10);
+            if(!state.history.includes(today)) state.history.push(today);
+            
+            // Отправляем данные боту
+            tg.sendData(JSON.stringify({
+                action: 'sync',
+                date: today,
+                trade: state
+            }));
+            
+            // Чтобы календарь визуально обновился ПЕРЕД закрытием
+            nav('scr-main');
+            alert("Данные сохранены. Приложение закроется.");
+            setTimeout(() => tg.close(), 500);
         }
 
         function renderCalendar() {
             const grid = document.getElementById('cal-render');
             grid.innerHTML = '';
-            const y = currentDate.getFullYear(), m = currentDate.getMonth();
-            document.getElementById('month-name').innerText = new Intl.DateTimeFormat('ru-RU', {month:'long', year:'numeric'}).format(currentDate);
-
-            const firstDay = new Date(y, m, 1).getDay();
-            const daysInMonth = new Date(y, m + 1, 0).getDate();
-            const offset = firstDay === 0 ? 6 : firstDay - 1;
-
-            for(let i=0; i<offset; i++) grid.innerHTML += '<div></div>';
-            for(let d=1; d<=daysInMonth; d++) {
-                const dStr = `${y}-${(m+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
-                const done = history.includes(dStr) ? 'done' : '';
-                const today = new Date().toISOString().slice(0,10) === dStr ? 'today' : '';
-                grid.innerHTML += `<div class="day ${done} ${today}">${d}</div>`;
+            const now = new Date();
+            const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            for(let i=1; i<=days; i++) {
+                const dStr = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${i.toString().padStart(2,'0')}`;
+                const cls = state.history.includes(dStr) ? 'day done' : 'day';
+                grid.innerHTML += `<div class="${cls}">${i}</div>`;
             }
         }
-
-        function changeMonth(s) { currentDate.setMonth(currentDate.getMonth() + s); renderCalendar(); }
-
-        function renderTrump() {
-            const c = document.getElementById('trump-feed');
-            c.innerHTML = trumpPosts.map(p => p.length > 5 ? `<div class="trump-post">🔹 ${p}</div>` : '').join('');
-        }
-
-        function handleConfirm() {
-            const today = new Date().toISOString().slice(0,10);
-            if(!history.includes(today)) history.push(today);
-            renderCalendar();
-            document.getElementById('conf-btn').style.display = 'none';
-            document.getElementById('conf-msg').style.display = 'block';
-            tg.sendData(JSON.stringify({action: 'analysis_done', date: today}));
-            setTimeout(() => { tg.close(); }, 1000);
-        }
-
-        document.getElementById('note-box').value = localStorage.getItem('smc_note') || '';
     </script>
 </body>
 </html>
