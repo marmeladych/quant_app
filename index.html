@@ -6,96 +6,102 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
-            --bg: #0b0e11; --card: rgba(23, 29, 37, 0.6); --accent: #f0b90b; 
-            --red: #f6465d; --green: #0ecb81; --border: rgba(255, 255, 255, 0.08); 
+            --bg: #111417; --card: #1c2025; --item-bg: #2b3139;
+            --accent: #4883fb; --text: #eaecef; --sub-text: #848e9c;
+            --red: #ff4d4f; --green: #00b07c; --border: #363c45;
         }
         
         body { 
-            background: var(--bg); color: #eaecef; font-family: 'Inter', sans-serif; 
+            background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; 
             margin: 0; padding: 0; height: 100vh; overflow: hidden;
-            background-image: radial-gradient(circle at 50% 0%, #1e1a0a 0%, #0b0e11 100%);
         }
 
-        .screen { display: none; flex-direction: column; height: 100vh; padding: 20px; box-sizing: border-box; overflow-y: auto; backdrop-filter: blur(15px); }
+        .screen { display: none; flex-direction: column; height: 100vh; padding: 16px; box-sizing: border-box; overflow-y: auto; }
         .active { display: flex; }
 
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-bottom: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        /* BingX Card Style */
+        .card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
         
-        .stat-item { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 12px; border: 1px solid var(--border); }
-        .stat-item label { font-size: 10px; color: #848e9c; display: block; margin-bottom: 4px; text-transform: uppercase; }
-        .stat-item span { font-size: 14px; font-weight: bold; color: var(--accent); }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .stat-box { background: var(--item-bg); padding: 12px; border-radius: 8px; }
+        .stat-box label { font-size: 11px; color: var(--sub-text); display: block; margin-bottom: 4px; }
+        .stat-box span { font-size: 14px; font-weight: 600; color: var(--accent); }
 
-        .btn-main { 
-            background: linear-gradient(90deg, #f0b90b, #f8d33a); color: #000; border: none;
-            padding: 18px; border-radius: 14px; font-weight: 800; font-size: 15px;
-            cursor: pointer; width: 100%; transition: 0.2s;
+        .btn-bingx { 
+            background: var(--accent); color: #fff; border: none;
+            padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px;
+            cursor: pointer; width: 100%; margin-top: 8px;
         }
-        .btn-main:active { transform: translateY(2px); opacity: 0.9; }
-        
-        .btn-outline { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 12px; cursor: pointer; font-weight: 600; }
+        .btn-outline { 
+            background: transparent; border: 1px solid var(--border); color: var(--text); 
+            padding: 12px; border-radius: 8px; font-weight: 500; cursor: pointer;
+        }
 
-        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
-        .day { aspect-ratio: 1; background: rgba(255,255,255,0.03); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #5e6673; transition: 0.3s; }
-        .day.done { background: var(--red) !important; color: #fff; box-shadow: 0 0 15px rgba(246, 70, 93, 0.3); }
-        .day.today { border: 1px solid var(--accent); color: var(--accent); font-weight: bold; }
+        /* Календарь BingX */
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .day { aspect-ratio: 1; background: transparent; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--sub-text); border: 1px solid transparent; }
+        .day.done { background: rgba(255, 77, 79, 0.2); color: var(--red); border: 1px solid var(--red); font-weight: bold; }
+        .day.today { border: 1px solid var(--accent); color: var(--accent); }
 
-        .back-btn { color: #848e9c; cursor: pointer; margin-bottom: 20px; display: inline-block; }
-        input { background: rgba(0,0,0,0.4); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 10px; margin-bottom: 12px; width: 100%; box-sizing: border-box; outline: none; }
-        input:focus { border-color: var(--accent); }
+        .back { color: var(--sub-text); cursor: pointer; margin-bottom: 16px; font-size: 14px; display: flex; align-items: center; }
+        input { background: var(--item-bg); border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 6px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
+        input:focus { border-color: var(--accent); outline: none; }
+
+        #tv-chart { flex-grow: 1; border-radius: 8px; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
     <div id="scr-main" class="screen active">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-            <h2 style="margin:0; letter-spacing: 1px;">SMC <span style="color:var(--accent)">QUANTUM</span></h2>
-            <div id="fng-val" style="background: rgba(14,203,129,0.1); color: var(--green); padding: 5px 12px; border-radius: 10px; font-size: 12px; font-weight: bold;">F&G: 65</div>
+        <div style="margin-bottom: 20px;">
+            <h2 style="margin:0; font-size: 20px;">SMC <span style="color:var(--accent)">QUANTUM</span></h2>
+            <div id="fng-info" style="font-size: 12px; color: var(--sub-text); margin-top: 4px;">Загрузка индекса...</div>
         </div>
 
-        <div class="card" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div class="stat-item"><label>Фаза рынка</label><span id="ui-phase">ОЖИДАНИЕ</span></div>
-            <div class="stat-item"><label>Статус</label><span id="ui-deal">НЕТ СДЕЛКИ</span></div>
-            <div class="stat-item" style="grid-column: span 2;"><label>Детали позиции</label><span id="ui-details">-</span></div>
+        <div class="card stat-grid">
+            <div class="stat-box"><label>ФАЗА</label><span id="ui-phase">ОЖИДАНИЕ</span></div>
+            <div class="stat-box"><label>СТАТУС</label><span id="ui-deal">НЕТ СДЕЛКИ</span></div>
+            <div class="stat-box" style="grid-column: span 2;"><label>ДЕТАЛИ ПОЗИЦИИ</label><span id="ui-details">-</span></div>
         </div>
 
-        <button class="btn-main" onclick="nav('scr-analysis')">🔍 ТОРГОВЫЙ АНАЛИЗ</button>
+        <button class="btn-bingx" onclick="nav('scr-analysis')">АНАЛИЗ РЫНКА</button>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
-            <button class="btn-outline" onclick="nav('scr-terminal')">📊 ГРАФИК</button>
-            <button class="btn-outline" onclick="nav('scr-calendar')">📅 ЖУРНАЛ</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+            <button class="btn-outline" onclick="nav('scr-terminal')">ГРАФИК</button>
+            <button class="btn-outline" onclick="nav('scr-calendar')">КАЛЕНДАРЬ</button>
         </div>
-        <button class="btn-outline" onclick="nav('scr-info')" style="width: 100%; margin-top: 12px;">🌍 МАКРОДАННЫЕ</button>
+        <button class="btn-outline" onclick="nav('scr-info')" style="margin-top: 10px; width: 100%;">ИНФО И МАКРО</button>
     </div>
 
     <div id="scr-calendar" class="screen">
-        <div class="back-btn" onclick="nav('scr-main')">← НА ГЛАВНУЮ</div>
+        <div class="back" onclick="nav('scr-main')">← Назад</div>
         <div class="card">
             <div class="cal-header">
-                <button onclick="changeMonth(-1)" class="btn-outline" style="padding: 5px 15px;">❮</button>
-                <b id="month-name" style="font-size: 18px;"></b>
-                <button onclick="changeMonth(1)" class="btn-outline" style="padding: 5px 15px;">❯</button>
+                <button onclick="changeMonth(-1)" class="btn-outline" style="padding: 4px 12px;">❮</button>
+                <b id="month-name"></b>
+                <button onclick="changeMonth(1)" class="btn-outline" style="padding: 4px 12px;">❯</button>
             </div>
             <div id="cal-render" class="cal-grid"></div>
         </div>
     </div>
 
     <div id="scr-analysis" class="screen">
-        <div class="back-btn" onclick="nav('scr-main')">← ОТМЕНА</div>
+        <div class="back" onclick="nav('scr-main')">← Отмена</div>
         <div id="flow-content"></div>
     </div>
 
     <div id="scr-info" class="screen">
-        <div class="back-btn" onclick="nav('scr-main')">← НАЗАД</div>
-        <div id="econ-container" style="height: 450px; border-radius: 15px; overflow: hidden; border: 1px solid var(--border);"></div>
-        <button class="btn-main" onclick="window.open('https://t.me/realDonaldTrump_rus')" style="margin-top: 20px; background: #0088cc; color: #fff;">
-            REAL DONALD TRUMP (RU)
+        <div class="back" onclick="nav('scr-main')">← Назад</div>
+        <div id="econ-widget" class="card" style="height: 400px; padding:0; overflow: hidden;"></div>
+        <button class="btn-bingx" onclick="window.open('https://t.me/realDonaldTrump_rus')" style="background: #24292e;">
+            TELEGRAM TRUMP (RU)
         </button>
     </div>
 
     <div id="scr-terminal" class="screen">
-        <div class="back-btn" onclick="nav('scr-main')">← НАЗАД</div>
-        <div id="tv-chart" style="height: 500px;"></div>
+        <div class="back" onclick="nav('scr-main')">← Назад</div>
+        <div id="tv-chart"></div>
     </div>
 
     <script src="https://s3.tradingview.com/tv.js"></script>
@@ -104,13 +110,22 @@
         tg.expand();
 
         let viewDate = new Date();
-        // Загружаем данные из URL (которые прислал бот при старте)
         let state = {
-            history: (new URLSearchParams(window.location.search).get('dates') || "").split(',').filter(d => d),
+            history: [],
             phase: 'Ожидание',
             dealStatus: 'Нет сделки',
             details: '-'
         };
+
+        // ЗАГРУЗКА ИЗ ОБЛАКА ТЕЛЕГРАМ ПРИ ЗАПУСКЕ
+        function loadFromCloud() {
+            tg.CloudStorage.getItem('smc_quantum_data', (err, value) => {
+                if (!err && value) {
+                    state = JSON.parse(value);
+                    updateMainUI();
+                }
+            });
+        }
 
         function nav(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -121,7 +136,7 @@
             if(id === 'scr-terminal') new TradingView.widget({"autosize": true, "symbol": "BINANCE:BTCUSDT", "interval": "15", "theme": "dark", "container_id": "tv-chart"});
         }
 
-        // --- БЕСКОНЕЧНЫЙ КАЛЕНДАРЬ ---
+        // КАЛЕНДАРЬ
         function renderCal() {
             const grid = document.getElementById('cal-render');
             grid.innerHTML = '';
@@ -135,84 +150,80 @@
             for(let i=0; i<offset; i++) grid.innerHTML += '<div></div>';
             for(let d=1; d<=days; d++) {
                 const dStr = `${y}-${(m+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
-                const isDone = state.history.includes(dStr) ? 'done' : '';
-                const isToday = new Date().toISOString().slice(0,10) === dStr ? 'today' : '';
-                grid.innerHTML += `<div class="day ${isDone} ${isToday}">${d}</div>`;
+                const cls = state.history.includes(dStr) ? 'day done' : 'day';
+                const today = new Date().toISOString().slice(0,10) === dStr ? 'today' : '';
+                grid.innerHTML += `<div class="${cls} ${today}">${d}</div>`;
             }
         }
         function changeMonth(v) { viewDate.setMonth(viewDate.getMonth() + v); renderCal(); }
 
-        // --- ОПРОС ---
+        // ОПРОС
         function showStep(step) {
             const flow = document.getElementById('flow-content');
             if(step === 'init') {
-                flow.innerHTML = `<h3>Выберите фазу:</h3>
-                    <button class="btn-main" onclick="state.phase='Коррекция'; showStep('correction')">ФАЗА КОРРЕКЦИИ</button>
-                    <button class="btn-main" onclick="state.phase='Импульс'; showStep('impulse')" style="margin-top:10px; background:#444; color:#fff;">ФАЗА ИМПУЛЬСА</button>`;
+                flow.innerHTML = `<h3>Выберите текущую фазу:</h3>
+                    <button class="btn-bingx" onclick="state.phase='Коррекция'; showStep('correction')">КОРРЕКЦИЯ</button>
+                    <button class="btn-outline" onclick="state.phase='Импульс'; showStep('impulse')" style="width:100%; margin-top:10px;">ИМПУЛЬС</button>`;
             } else if(step === 'impulse') {
                 state.dealStatus = 'Ожидание';
-                flow.innerHTML = `<div class="card"><h3>Статус: ОЖИДАНИЕ</h3><p>Ждем фазу коррекции для поиска ТВХ.</p></div>
-                    <button class="btn-main" onclick="state.phase='Коррекция'; showStep('correction')">ПЕРЕШЛИ В КОРРЕКЦИЮ</button>
-                    <button class="btn-outline" onclick="saveAndStay()" style="width:100%; margin-top:10px;">ПОДТВЕРДИТЬ И ВЕРНУТЬСЯ</button>`;
+                flow.innerHTML = `<div class="card"><h4>Фаза: Импульс</h4><p style="color:var(--sub-text); font-size:13px;">Ждем завершения импульса и начала коррекции.</p></div>
+                    <button class="btn-bingx" onclick="state.phase='Коррекция'; showStep('correction')">ПЕРЕШЛИ В КОРРЕКЦИЮ</button>
+                    <button class="btn-outline" onclick="saveState()" style="width:100%; margin-top:10px;">ЗАВЕРШИТЬ РАЗБОР</button>`;
             } else if(step === 'correction') {
                 state.dealStatus = 'Ожидание входа';
-                flow.innerHTML = `<div class="card"><h3>Статус: ПОИСК ВХОДА</h3><p>Коррекция подтверждена.</p></div>
-                    <button class="btn-main" onclick="showStep('form')">ЕСТЬ ВХОД (SMC)</button>
-                    <button class="btn-outline" onclick="saveAndStay()" style="width:100%; margin-top:10px;">ВХОДА НЕТ</button>`;
+                flow.innerHTML = `<div class="card"><h4>Фаза: Коррекция</h4><p style="color:var(--sub-text); font-size:13px;">Ищем зону интереса (POI) для входа.</p></div>
+                    <button class="btn-bingx" onclick="showStep('form')">ВХОД БЫЛ (SMC)</button>
+                    <button class="btn-outline" onclick="saveState()" style="width:100%; margin-top:10px;">ВХОДА НЕТ</button>`;
             } else if(step === 'form') {
-                flow.innerHTML = `<h3>Параметры сделки:</h3>
-                    <input id="in-e" type="number" placeholder="Вход (Price)">
+                flow.innerHTML = `<h3>Детали сделки:</h3>
+                    <input id="in-e" type="number" placeholder="Вход (Цена)">
                     <input id="in-sl" type="number" placeholder="Stop Loss">
-                    <input id="in-rr" placeholder="RR (напр. 1:3)">
-                    <button class="btn-main" onclick="submitDeal()">ОТКРЫТЬ ПОЗИЦИЮ</button>`;
+                    <input id="in-rr" placeholder="RR (Риск/Прибыль)">
+                    <button class="btn-bingx" onclick="submitDeal()">ОТКРЫТЬ ПОЗИЦИЮ</button>`;
             }
-            updateUI();
+            updateMainUI();
         }
 
         function submitDeal() {
             state.dealStatus = 'В СДЕЛКЕ';
             state.details = `E: ${document.getElementById('in-e').value} | SL: ${document.getElementById('in-sl').value} | RR: ${document.getElementById('in-rr').value}`;
-            saveAndStay();
+            saveState();
         }
 
-        function updateUI() {
+        function updateMainUI() {
             document.getElementById('ui-phase').innerText = state.phase;
             document.getElementById('ui-deal').innerText = state.dealStatus;
             document.getElementById('ui-details').innerText = state.details;
         }
 
-        // ГЛАВНЫЙ ФИКС: Сохранение БЕЗ закрытия
-        function saveAndStay() {
+        function saveState() {
             const today = new Date().toISOString().slice(0,10);
             if(!state.history.includes(today)) state.history.push(today);
             
-            updateUI();
-            
-            // Сохраняем в CloudStorage Telegram (это не закрывает окно!)
-            if (tg.CloudStorage) {
-                tg.CloudStorage.setItem('trading_state', JSON.stringify(state));
-            }
-
-            // Опционально: можно отправить боту уведомление через fetch, если у тебя есть сервер
-            // Но для текущей задачи — мы просто обновляем интерфейс и возвращаемся на главную
-            nav('scr-main');
-            tg.HapticFeedback.notificationOccurred('success');
+            // СОХРАНЕНИЕ В ОБЛАКО ТЕЛЕГРАМ
+            tg.CloudStorage.setItem('smc_quantum_data', JSON.stringify(state), (err) => {
+                if(!err) {
+                    tg.HapticFeedback.notificationOccurred('success');
+                    nav('scr-main');
+                }
+            });
         }
 
         function initEcon() {
-            const cont = document.getElementById('econ-container');
-            cont.innerHTML = '';
+            const box = document.getElementById('econ-widget'); box.innerHTML = '';
             const script = document.createElement('script');
             script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-events.js';
             script.async = true;
-            script.text = JSON.stringify({colorTheme: "dark", width: "100%", height: "100%", locale: "ru", importanceFilter: "0,1"});
-            cont.appendChild(script);
+            script.text = JSON.stringify({colorTheme: "dark", width: "100%", height: "100%", locale: "ru", importanceFilter: "1"});
+            box.appendChild(script);
         }
 
-        // Fear & Greed
         fetch('https://api.alternative.me/fng/').then(r=>r.json()).then(d=>{
-            document.getElementById('fng-val').innerText = `F&G: ${d.data[0].value}`;
+            document.getElementById('fng-info').innerText = `Fear & Greed Index: ${d.data[0].value} (${d.data[0].value_classification})`;
         });
+
+        // Запуск загрузки
+        loadFromCloud();
     </script>
 </body>
 </html>
