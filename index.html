@@ -9,146 +9,85 @@
         :root { 
             --accent: #4883fb; --text-main: #ffffff; --text-grey: #848e9c;
             --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(255, 255, 255, 0.08);
-            --red: #ff4d4f; --green: #00b07c; --be: #ffffff;
+            --red: #ff4d4f; --green: #00b07c;
         }
-        
-        body { 
-            background: #0b0e11; color: var(--text-main); font-family: 'Inter', sans-serif; 
-            margin: 0; padding: 0; height: 100vh; overflow: hidden;
-        }
-
-        /* Анимированный фон Aurora */
-        .bg-animate {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background: radial-gradient(circle at 0% 0%, rgba(72, 131, 251, 0.12) 0%, transparent 35%),
-                        radial-gradient(circle at 100% 100%, rgba(240, 185, 11, 0.08) 0%, transparent 35%);
-            animation: pulse 10s infinite alternate;
-        }
-        @keyframes pulse { from { opacity: 0.6; } to { opacity: 1; } }
-
+        body { background: #0b0e11; color: var(--text-main); font-family: 'Inter', sans-serif; margin: 0; height: 100vh; overflow: hidden; }
+        .bg-animate { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at 0% 0%, rgba(72, 131, 251, 0.08) 0%, transparent 40%); }
         .screen { display: none; flex-direction: column; height: 100vh; padding: 20px; box-sizing: border-box; overflow-y: auto; }
         .active { display: flex; }
-
-        /* Элементы Glassmorphism */
-        .glass-card { 
-            background: var(--glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border: 1px solid var(--glass-border); border-radius: 24px; padding: 20px; margin-bottom: 16px;
-        }
-        
-        .label { font-size: 11px; font-weight: 800; color: var(--text-grey); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px; }
-        .val { font-size: 16px; font-weight: 900; color: var(--text-main); }
-
-        .btn-glass { 
-            background: var(--accent); color: #fff; border: none; padding: 18px; border-radius: 20px;
-            font-weight: 900; font-size: 15px; cursor: pointer; transition: 0.2s;
-            box-shadow: 0 10px 25px rgba(72, 131, 251, 0.2);
-        }
-        .btn-sub { 
-            background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-main);
-            padding: 16px; border-radius: 18px; font-weight: 700; cursor: pointer;
-        }
-
-        /* Календарь с PnL */
+        .glass-card { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 20px; margin-bottom: 16px; }
+        .label { font-size: 11px; font-weight: 800; color: var(--text-grey); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .val { font-size: 16px; font-weight: 900; }
+        .btn-glass { background: var(--accent); color: #fff; border: none; padding: 18px; border-radius: 20px; font-weight: 900; cursor: pointer; }
+        .btn-sub { background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-main); padding: 16px; border-radius: 18px; font-weight: 700; cursor: pointer; }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
         .day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; border-radius: 10px; color: var(--text-grey); }
-        .day.win { background: var(--green); color: #fff; box-shadow: 0 0 15px rgba(0, 176, 124, 0.3); }
-        .day.loss { background: var(--red); color: #fff; box-shadow: 0 0 15px rgba(255, 77, 79, 0.3); }
+        .day.win { background: var(--green); color: #fff; }
+        .day.loss { background: var(--red); color: #fff; }
         .day.be { background: #fff; color: #000; }
         .day.today { border: 2px solid var(--accent); }
-
-        .notes-area { 
-            background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: #fff;
-            border-radius: 18px; padding: 15px; width: 100%; box-sizing: border-box;
-            font-family: inherit; font-size: 14px; resize: none; outline: none;
-        }
-
-        .back { font-weight: 800; color: var(--text-grey); cursor: pointer; margin-bottom: 20px; display: inline-block; }
+        .notes-area { background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: #fff; border-radius: 18px; padding: 15px; width: 100%; box-sizing: border-box; resize: none; outline: none; }
     </style>
 </head>
 <body>
     <div class="bg-animate"></div>
 
     <div id="scr-main" class="screen active">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <h1 style="font-weight: 900; margin:0; font-size: 26px;">SMC <span style="color:var(--accent)">QUANTUM</span></h1>
-            <div id="fng" style="font-weight: 900; color: var(--accent); background: rgba(72,131,251,0.1); padding: 6px 12px; border-radius: 12px;">F&G: --</div>
-        </div>
-
+        <h1 style="font-weight: 900; font-size: 26px; margin-bottom: 25px;">SMC <span style="color:var(--accent)">QUANTUM</span></h1>
         <div class="glass-card" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <div><div class="label">Phase</div><div class="val" id="ui-phase">WAITING</div></div>
-            <div><div class="label">Status</div><div class="val" id="ui-deal">NO TRADE</div></div>
-            <div style="grid-column: span 2;"><div class="label">Current Position</div><div class="val" id="ui-details">-</div></div>
+            <div><div class="label">Phase</div><div id="ui-phase" class="val">WAITING</div></div>
+            <div><div class="label">Status</div><div id="ui-deal" class="val">NO TRADE</div></div>
+            <div style="grid-column: span 2;"><div class="label">Details</div><div id="ui-details" class="val">-</div></div>
         </div>
-
-        <button class="btn-glass" onclick="nav('scr-analysis')">START ANALYSIS</button>
-        
+        <button class="btn-glass" onclick="nav('scr-analysis')">NEW ANALYSIS</button>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
             <button class="btn-sub" onclick="nav('scr-terminal')">TERMINAL</button>
-            <button class="btn-sub" onclick="nav('scr-calendar')">PNL LOG</button>
+            <button class="btn-sub" onclick="nav('scr-calendar')">LOGS</button>
         </div>
     </div>
 
     <div id="scr-terminal" class="screen">
-        <div class="back" onclick="nav('scr-main')">← BACK</div>
-        <div id="tv-chart" style="height: 380px; border-radius: 20px; overflow: hidden; border: 1px solid var(--glass-border);"></div>
-        
-        <div class="label" style="margin-top: 20px;">Trading Notes</div>
-        <textarea id="ui-notes" class="notes-area" placeholder="Market bias, POI, Liquidity..." oninput="saveAll()"></textarea>
-
-        <div class="label" style="margin-top: 20px;">Price Alerts (BTC)</div>
-        <div style="display: flex; gap: 10px;">
-            <input id="alert-price" class="notes-area" type="number" placeholder="Enter Price" style="min-height: 50px;">
-            <button class="btn-glass" style="padding: 0 25px;" onclick="setAlert()">SET</button>
+        <div onclick="nav('scr-main')" style="cursor:pointer; color:var(--text-grey); margin-bottom:20px; font-weight:800;">← BACK</div>
+        <div id="tv-chart" style="height: 350px; border-radius: 20px; overflow: hidden; border: 1px solid var(--glass-border);"></div>
+        <textarea id="ui-notes" class="notes-area" style="margin-top:20px; min-height:100px;" placeholder="HTF Notes..." oninput="saveAll()"></textarea>
+        <div class="label" style="margin-top:20px;">BTC Alert</div>
+        <div style="display:flex; gap:10px;">
+            <input id="alert-price" class="notes-area" type="number" placeholder="Price" style="height:50px;">
+            <button class="btn-glass" onclick="setAlert()">SET</button>
         </div>
-        <div id="alert-list" style="margin-top: 10px; font-size: 12px; color: var(--accent);"></div>
     </div>
 
     <div id="scr-calendar" class="screen">
-        <div class="back" onclick="nav('scr-main')">← BACK</div>
+        <div onclick="nav('scr-main')" style="cursor:pointer; color:var(--text-grey); margin-bottom:20px; font-weight:800;">← BACK</div>
         <div class="glass-card">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center;">
-                <button onclick="changeMonth(-1)" class="btn-sub" style="padding: 5px 15px;">❮</button>
-                <b id="month-name" style="font-weight: 900;"></b>
-                <button onclick="changeMonth(1)" class="btn-sub" style="padding: 5px 15px;">❯</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <button class="btn-sub" onclick="changeMonth(-1)">❮</button>
+                <b id="month-name"></b>
+                <button class="btn-sub" onclick="changeMonth(1)">❯</button>
             </div>
             <div id="cal-render" class="cal-grid"></div>
         </div>
-
-        <div class="glass-card" style="display: grid; grid-template-columns: 1fr 1fr 1fr; text-align: center;">
-            <div><div class="val" style="color:var(--green)" id="stat-w">0</div><div class="label">Wins</div></div>
-            <div><div class="val" style="color:var(--red)" id="stat-l">0</div><div class="label">Loss</div></div>
-            <div><div class="val" id="stat-be">0</div><div class="label">BE</div></div>
+        <div class="glass-card" style="display:grid; grid-template-columns: 1fr 1fr 1fr; text-align:center;">
+            <div><div id="stat-w" class="val" style="color:var(--green)">0</div><div class="label">Wins</div></div>
+            <div><div id="stat-l" class="val" style="color:var(--red)">0</div><div class="label">Loss</div></div>
+            <div><div id="stat-be" class="val">0</div><div class="label">BE</div></div>
         </div>
     </div>
 
     <div id="scr-analysis" class="screen">
-        <div class="back" onclick="nav('scr-main')">← CANCEL</div>
+        <div onclick="nav('scr-main')" style="cursor:pointer; color:var(--text-grey); margin-bottom:20px; font-weight:800;">← CANCEL</div>
         <div id="flow-content"></div>
     </div>
 
     <script src="https://s3.tradingview.com/tv.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand();
-
         let viewDate = new Date();
-        let state = {
-            history: [], // [{date: 'YYYY-MM-DD', res: 'W'|'L'|'BE'}]
-            phase: 'Waiting',
-            dealStatus: 'No Trade',
-            details: '-',
-            notes: '',
-            alerts: []
-        };
+        let state = { history: [], phase: 'Waiting', dealStatus: 'No Trade', details: '-', notes: '' };
 
         function loadData() {
-            tg.CloudStorage.getItem('smc_quantum_v5', (err, value) => {
-                if (!err && value) {
-                    state = JSON.parse(value);
-                    document.getElementById('ui-notes').value = state.notes || '';
-                    updateUI();
-                    renderAlerts();
-                }
+            tg.CloudStorage.getItem('smc_final_v1', (err, val) => {
+                if (!err && val) { state = JSON.parse(val); updateUI(); }
             });
         }
 
@@ -156,111 +95,73 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             if(id === 'scr-calendar') renderCal();
-            if(id === 'scr-terminal') {
-                new TradingView.widget({"autosize": true, "symbol": "BINANCE:BTCUSDT", "interval": "15", "theme": "dark", "container_id": "tv-chart"});
-            }
+            if(id === 'scr-terminal') new TradingView.widget({"autosize": true, "symbol": "BINANCE:BTCUSDT", "interval": "15", "theme": "dark", "container_id": "tv-chart"});
             if(id === 'scr-analysis') showStep('init');
         }
 
-        // --- CALENDAR & PNL ---
         function renderCal() {
             const grid = document.getElementById('cal-render'); grid.innerHTML = '';
             const y = viewDate.getFullYear(), m = viewDate.getMonth();
-            document.getElementById('month-name').innerText = new Intl.DateTimeFormat('en-US', {month:'long', year:'numeric'}).format(viewDate);
-            
+            document.getElementById('month-name').innerText = new Intl.DateTimeFormat('ru', {month:'long', year:'numeric'}).format(viewDate);
             const first = new Date(y, m, 1).getDay();
             const days = new Date(y, m + 1, 0).getDate();
             const offset = (first === 0 ? 6 : first - 1);
-            
             let w=0, l=0, be=0;
             state.history.forEach(h => { if(h.res === 'W') w++; if(h.res === 'L') l++; if(h.res === 'BE') be++; });
-            document.getElementById('stat-w').innerText = w;
-            document.getElementById('stat-l').innerText = l;
-            document.getElementById('stat-be').innerText = be;
-
+            document.getElementById('stat-w').innerText = w; document.getElementById('stat-l').innerText = l; document.getElementById('stat-be').innerText = be;
             for(let i=0; i<offset; i++) grid.innerHTML += '<div></div>';
             for(let d=1; d<=days; d++) {
                 const dStr = `${y}-${(m+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
-                const hEntry = state.history.find(h => h.date === dStr);
-                let cls = 'day';
-                if(hEntry) cls += ' ' + hEntry.res.toLowerCase();
+                const entry = state.history.find(h => h.date === dStr);
+                let cls = 'day'; if(entry) cls += ' ' + entry.res.toLowerCase();
                 if(new Date().toISOString().slice(0,10) === dStr) cls += ' today';
                 grid.innerHTML += `<div class="${cls}">${d}</div>`;
             }
         }
+
         function changeMonth(v) { viewDate.setMonth(viewDate.getMonth() + v); renderCal(); }
 
-        // --- ANALYSIS & RESULTS ---
         function showStep(s) {
             const flow = document.getElementById('flow-content');
             if(s === 'init') {
-                flow.innerHTML = `<div class="label">Market Structure</div>
-                    <button class="btn-glass" style="width:100%" onclick="state.phase='Correction'; showStep('correction')">CORRECTION</button>
-                    <button class="btn-sub" style="width:100%; margin-top:10px;" onclick="state.phase='Impulse'; showStep('impulse')">IMPULSE</button>`;
-            } else if(s === 'impulse') {
-                state.dealStatus = 'Waiting Bias';
-                flow.innerHTML = `<div class="glass-card">Impulse Phase. No entries.</div>
-                    <button class="btn-sub" style="width:100%" onclick="saveAll()">CONFIRM & FINISH</button>`;
-            } else if(s === 'correction') {
-                state.dealStatus = 'Searching POI';
-                flow.innerHTML = `<div class="glass-card">Correction Phase. Waiting for entry.</div>
-                    <button class="btn-glass" style="width:100%" onclick="showStep('form')">ENTERED TRADE</button>
-                    <button class="btn-sub" style="width:100%; margin-top:10px;" onclick="saveAll()">NO ENTRY</button>`;
+                flow.innerHTML = `<div class="label">Structure</div>
+                    <button class="btn-glass" style="width:100%" onclick="state.phase='Correction'; showStep('form')">CORRECTION</button>
+                    <button class="btn-sub" style="width:100%; margin-top:10px;" onclick="state.phase='Impulse'; saveAll()">IMPULSE</button>`;
             } else if(s === 'form') {
-                flow.innerHTML = `<div class="label">Trade Details</div>
-                    <input class="notes-area" id="in-details" placeholder="E: 69120 | SL: 68500 | RR: 1:3">
-                    <div class="label" style="margin-top:20px;">Trade Result</div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                flow.innerHTML = `<div class="label">Trade Result</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
                         <button class="btn-glass" style="background:var(--green)" onclick="finishTrade('W')">WIN</button>
                         <button class="btn-glass" style="background:var(--red)" onclick="finishTrade('L')">LOSS</button>
                         <button class="btn-sub" onclick="finishTrade('BE')">BE</button>
                     </div>`;
             }
-            updateUI();
         }
 
         function finishTrade(res) {
             const today = new Date().toISOString().slice(0,10);
-            state.dealStatus = 'Trade Finished';
-            state.details = document.getElementById('in-details').value;
             state.history = state.history.filter(h => h.date !== today);
             state.history.push({date: today, res: res});
-            saveAll();
+            state.dealStatus = 'FINISHED: ' + res;
+            saveAll(); nav('scr-calendar');
         }
 
-        // --- ALERTS ---
         function setAlert() {
             const p = document.getElementById('alert-price').value;
-            if(!p) return;
-            state.alerts.push(p);
-            // Отправляем боту через sendData только алерты, чтобы он их записал в Python базу
-            tg.sendData(JSON.stringify({type: 'alert', price: p}));
-            renderAlerts();
-            saveAll();
+            if(p) tg.sendData(JSON.stringify({type: 'alert', price: p}));
         }
-        function renderAlerts() {
-            document.getElementById('alert-list').innerText = state.alerts.length ? 'Active: ' + state.alerts.join(', ') : 'No active alerts';
+
+        function saveAll() {
+            state.notes = document.getElementById('ui-notes').value || '';
+            tg.CloudStorage.setItem('smc_final_v1', JSON.stringify(state), () => { updateUI(); });
         }
 
         function updateUI() {
             document.getElementById('ui-phase').innerText = state.phase.toUpperCase();
             document.getElementById('ui-deal').innerText = state.dealStatus.toUpperCase();
-            document.getElementById('ui-details').innerText = state.details;
+            document.getElementById('ui-notes').value = state.notes;
         }
 
-        function saveAll() {
-            state.notes = document.getElementById('ui-notes').value;
-            tg.CloudStorage.setItem('smc_quantum_v5', JSON.stringify(state), () => {
-                updateUI();
-                tg.HapticFeedback.impactOccurred('medium');
-            });
-        }
-
-        fetch('https://api.alternative.me/fng/').then(r=>r.json()).then(d=>{
-            document.getElementById('fng').innerText = `F&G: ${d.data[0].value}`;
-        });
-
-        loadData();
+        loadData(); tg.expand();
     </script>
 </body>
 </html>
