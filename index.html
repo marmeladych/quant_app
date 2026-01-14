@@ -4,104 +4,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg: #111417; --card: #1c2025; --item-bg: #2b3139;
-            --accent: #4883fb; --text: #eaecef; --sub-text: #848e9c;
-            --red: #ff4d4f; --green: #00b07c; --border: #363c45;
+            --accent: #4883fb; --text-main: #ffffff; --text-grey: #848e9c;
+            --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(255, 255, 255, 0.08);
+            --red: #ff4d4f;
         }
         
         body { 
-            background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; 
+            background: #0b0e11; color: var(--text-main); font-family: 'Inter', sans-serif; 
             margin: 0; padding: 0; height: 100vh; overflow: hidden;
+            position: relative;
         }
 
-        .screen { display: none; flex-direction: column; height: 100vh; padding: 16px; box-sizing: border-box; overflow-y: auto; }
+        /* Анимированный плавающий фон */
+        .bg-animate {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 10% 20%, rgba(72, 131, 251, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(240, 185, 11, 0.1) 0%, transparent 40%),
+                        #0b0e11;
+            filter: blur(80px); animation: moveBg 15s infinite alternate;
+        }
+        @keyframes moveBg {
+            from { transform: scale(1); } to { transform: scale(1.2); }
+        }
+
+        .screen { display: none; flex-direction: column; height: 100vh; padding: 20px; box-sizing: border-box; overflow-y: auto; }
         .active { display: flex; }
 
-        /* BingX Card Style */
-        .card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+        /* Современные прозрачные карточки */
+        .glass-card { 
+            background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); border-radius: 24px; padding: 20px; margin-bottom: 16px;
+        }
         
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .stat-box { background: var(--item-bg); padding: 12px; border-radius: 8px; }
-        .stat-box label { font-size: 11px; color: var(--sub-text); display: block; margin-bottom: 4px; }
-        .stat-box span { font-size: 14px; font-weight: 600; color: var(--accent); }
+        .label { font-size: 11px; font-weight: 700; color: var(--text-grey); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .val { font-size: 16px; font-weight: 800; color: var(--text-main); }
 
-        .btn-bingx { 
-            background: var(--accent); color: #fff; border: none;
-            padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px;
-            cursor: pointer; width: 100%; margin-top: 8px;
+        /* Современные кнопки */
+        .btn-glass { 
+            background: var(--accent); color: #fff; border: none; padding: 18px; border-radius: 18px;
+            font-weight: 800; font-size: 15px; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 8px 20px rgba(72, 131, 251, 0.2);
         }
-        .btn-outline { 
-            background: transparent; border: 1px solid var(--border); color: var(--text); 
-            padding: 12px; border-radius: 8px; font-weight: 500; cursor: pointer;
+        .btn-glass:active { transform: scale(0.96); }
+
+        .btn-sub { 
+            background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-main);
+            padding: 14px; border-radius: 16px; font-weight: 700; cursor: pointer;
         }
 
-        /* Календарь BingX */
-        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-        .day { aspect-ratio: 1; background: transparent; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--sub-text); border: 1px solid transparent; }
-        .day.done { background: rgba(255, 77, 79, 0.2); color: var(--red); border: 1px solid var(--red); font-weight: bold; }
-        .day.today { border: 1px solid var(--accent); color: var(--accent); }
+        /* Календарь */
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+        .day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; border-radius: 12px; color: var(--text-grey); transition: 0.3s; }
+        .day.done { background: var(--red); color: #fff; box-shadow: 0 0 15px rgba(255, 77, 79, 0.4); }
+        .day.today { border: 1.5px solid var(--accent); color: var(--accent); }
 
-        .back { color: var(--sub-text); cursor: pointer; margin-bottom: 16px; font-size: 14px; display: flex; align-items: center; }
-        input { background: var(--item-bg); border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 6px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
-        input:focus { border-color: var(--accent); outline: none; }
+        /* Заметки */
+        .notes-area { 
+            background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: #fff;
+            border-radius: 18px; padding: 15px; width: 100%; box-sizing: border-box;
+            font-family: inherit; font-size: 14px; resize: none; margin-top: 15px; min-height: 100px;
+        }
 
-        #tv-chart { flex-grow: 1; border-radius: 8px; border: 1px solid var(--border); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .back-link { font-weight: 700; color: var(--text-grey); cursor: pointer; display: inline-block; margin-bottom: 20px; }
+        
+        #tv-chart { flex-grow: 1; border-radius: 24px; overflow: hidden; border: 1px solid var(--glass-border); min-height: 350px; }
     </style>
 </head>
 <body>
+    <div class="bg-animate"></div>
 
     <div id="scr-main" class="screen active">
-        <div style="margin-bottom: 20px;">
-            <h2 style="margin:0; font-size: 20px;">SMC <span style="color:var(--accent)">QUANTUM</span></h2>
-            <div id="fng-info" style="font-size: 12px; color: var(--sub-text); margin-top: 4px;">Загрузка индекса...</div>
+        <div class="header">
+            <h1 style="font-weight: 800; margin:0; font-size: 24px;">SMC <span style="color:var(--accent)">QUANTUM</span></h1>
+            <div id="fng" style="font-weight: 800; color: var(--accent);">F&G: --</div>
         </div>
 
-        <div class="card stat-grid">
-            <div class="stat-box"><label>ФАЗА</label><span id="ui-phase">ОЖИДАНИЕ</span></div>
-            <div class="stat-box"><label>СТАТУС</label><span id="ui-deal">НЕТ СДЕЛКИ</span></div>
-            <div class="stat-box" style="grid-column: span 2;"><label>ДЕТАЛИ ПОЗИЦИИ</label><span id="ui-details">-</span></div>
+        <div class="glass-card" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div><div class="label">Phase</div><div class="val" id="ui-phase">WAITING</div></div>
+            <div><div class="label">Status</div><div class="val" id="ui-deal">NO TRADE</div></div>
+            <div style="grid-column: span 2;"><div class="label">Position Details</div><div class="val" id="ui-details">-</div></div>
         </div>
 
-        <button class="btn-bingx" onclick="nav('scr-analysis')">АНАЛИЗ РЫНКА</button>
+        <button class="btn-glass" onclick="nav('scr-analysis')">NEW ANALYSIS</button>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-            <button class="btn-outline" onclick="nav('scr-terminal')">ГРАФИК</button>
-            <button class="btn-outline" onclick="nav('scr-calendar')">КАЛЕНДАРЬ</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
+            <button class="btn-sub" onclick="nav('scr-terminal')">CHART</button>
+            <button class="btn-sub" onclick="nav('scr-calendar')">LOG</button>
         </div>
-        <button class="btn-outline" onclick="nav('scr-info')" style="margin-top: 10px; width: 100%;">ИНФО И МАКРО</button>
+    </div>
+
+    <div id="scr-terminal" class="screen">
+        <div class="back-link" onclick="nav('scr-main')">← BACK</div>
+        <div id="tv-chart"></div>
+        <textarea id="ui-notes" class="notes-area" placeholder="Write your HTF thoughts here..." oninput="saveNotes()"></textarea>
     </div>
 
     <div id="scr-calendar" class="screen">
-        <div class="back" onclick="nav('scr-main')">← Назад</div>
-        <div class="card">
-            <div class="cal-header">
-                <button onclick="changeMonth(-1)" class="btn-outline" style="padding: 4px 12px;">❮</button>
+        <div class="back-link" onclick="nav('scr-main')">← BACK</div>
+        <div class="glass-card">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <button onclick="changeMonth(-1)" class="btn-sub" style="padding: 5px 15px;">❮</button>
                 <b id="month-name"></b>
-                <button onclick="changeMonth(1)" class="btn-outline" style="padding: 4px 12px;">❯</button>
+                <button onclick="changeMonth(1)" class="btn-sub" style="padding: 5px 15px;">❯</button>
             </div>
             <div id="cal-render" class="cal-grid"></div>
         </div>
     </div>
 
     <div id="scr-analysis" class="screen">
-        <div class="back" onclick="nav('scr-main')">← Отмена</div>
+        <div class="back-link" onclick="nav('scr-main')">← CANCEL</div>
         <div id="flow-content"></div>
-    </div>
-
-    <div id="scr-info" class="screen">
-        <div class="back" onclick="nav('scr-main')">← Назад</div>
-        <div id="econ-widget" class="card" style="height: 400px; padding:0; overflow: hidden;"></div>
-        <button class="btn-bingx" onclick="window.open('https://t.me/realDonaldTrump_rus')" style="background: #24292e;">
-            TELEGRAM TRUMP (RU)
-        </button>
-    </div>
-
-    <div id="scr-terminal" class="screen">
-        <div class="back" onclick="nav('scr-main')">← Назад</div>
-        <div id="tv-chart"></div>
     </div>
 
     <script src="https://s3.tradingview.com/tv.js"></script>
@@ -112,17 +128,19 @@
         let viewDate = new Date();
         let state = {
             history: [],
-            phase: 'Ожидание',
-            dealStatus: 'Нет сделки',
-            details: '-'
+            phase: 'Waiting',
+            dealStatus: 'No Trade',
+            details: '-',
+            notes: ''
         };
 
-        // ЗАГРУЗКА ИЗ ОБЛАКА ТЕЛЕГРАМ ПРИ ЗАПУСКЕ
-        function loadFromCloud() {
-            tg.CloudStorage.getItem('smc_quantum_data', (err, value) => {
+        // ЗАГРУЗКА ИЗ ОБЛАКА
+        function loadData() {
+            tg.CloudStorage.getItem('smc_v4_data', (err, value) => {
                 if (!err && value) {
                     state = JSON.parse(value);
-                    updateMainUI();
+                    document.getElementById('ui-notes').value = state.notes || '';
+                    updateUI();
                 }
             });
         }
@@ -131,99 +149,84 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             if(id === 'scr-calendar') renderCal();
-            if(id === 'scr-info') initEcon();
-            if(id === 'scr-analysis') showStep('init');
             if(id === 'scr-terminal') new TradingView.widget({"autosize": true, "symbol": "BINANCE:BTCUSDT", "interval": "15", "theme": "dark", "container_id": "tv-chart"});
+            if(id === 'scr-analysis') showStep('init');
         }
 
-        // КАЛЕНДАРЬ
         function renderCal() {
-            const grid = document.getElementById('cal-render');
-            grid.innerHTML = '';
+            const grid = document.getElementById('cal-render'); grid.innerHTML = '';
             const y = viewDate.getFullYear(), m = viewDate.getMonth();
-            document.getElementById('month-name').innerText = new Intl.DateTimeFormat('ru-RU', {month:'long', year:'numeric'}).format(viewDate);
-            
+            document.getElementById('month-name').innerText = new Intl.DateTimeFormat('en-US', {month:'long', year:'numeric'}).format(viewDate);
             const first = new Date(y, m, 1).getDay();
             const days = new Date(y, m + 1, 0).getDate();
             const offset = (first === 0 ? 6 : first - 1);
-
             for(let i=0; i<offset; i++) grid.innerHTML += '<div></div>';
             for(let d=1; d<=days; d++) {
                 const dStr = `${y}-${(m+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
                 const cls = state.history.includes(dStr) ? 'day done' : 'day';
-                const today = new Date().toISOString().slice(0,10) === dStr ? 'today' : '';
-                grid.innerHTML += `<div class="${cls} ${today}">${d}</div>`;
+                const isToday = new Date().toISOString().slice(0,10) === dStr ? 'today' : '';
+                grid.innerHTML += `<div class="${cls} ${isToday}">${d}</div>`;
             }
         }
         function changeMonth(v) { viewDate.setMonth(viewDate.getMonth() + v); renderCal(); }
 
-        // ОПРОС
-        function showStep(step) {
+        function showStep(s) {
             const flow = document.getElementById('flow-content');
-            if(step === 'init') {
-                flow.innerHTML = `<h3>Выберите текущую фазу:</h3>
-                    <button class="btn-bingx" onclick="state.phase='Коррекция'; showStep('correction')">КОРРЕКЦИЯ</button>
-                    <button class="btn-outline" onclick="state.phase='Импульс'; showStep('impulse')" style="width:100%; margin-top:10px;">ИМПУЛЬС</button>`;
-            } else if(step === 'impulse') {
-                state.dealStatus = 'Ожидание';
-                flow.innerHTML = `<div class="card"><h4>Фаза: Импульс</h4><p style="color:var(--sub-text); font-size:13px;">Ждем завершения импульса и начала коррекции.</p></div>
-                    <button class="btn-bingx" onclick="state.phase='Коррекция'; showStep('correction')">ПЕРЕШЛИ В КОРРЕКЦИЮ</button>
-                    <button class="btn-outline" onclick="saveState()" style="width:100%; margin-top:10px;">ЗАВЕРШИТЬ РАЗБОР</button>`;
-            } else if(step === 'correction') {
-                state.dealStatus = 'Ожидание входа';
-                flow.innerHTML = `<div class="card"><h4>Фаза: Коррекция</h4><p style="color:var(--sub-text); font-size:13px;">Ищем зону интереса (POI) для входа.</p></div>
-                    <button class="btn-bingx" onclick="showStep('form')">ВХОД БЫЛ (SMC)</button>
-                    <button class="btn-outline" onclick="saveState()" style="width:100%; margin-top:10px;">ВХОДА НЕТ</button>`;
-            } else if(step === 'form') {
-                flow.innerHTML = `<h3>Детали сделки:</h3>
-                    <input id="in-e" type="number" placeholder="Вход (Цена)">
-                    <input id="in-sl" type="number" placeholder="Stop Loss">
-                    <input id="in-rr" placeholder="RR (Риск/Прибыль)">
-                    <button class="btn-bingx" onclick="submitDeal()">ОТКРЫТЬ ПОЗИЦИЮ</button>`;
+            if(s === 'init') {
+                flow.innerHTML = `<div class="label">Select Market Phase</div>
+                    <button class="btn-glass" style="width:100%" onclick="state.phase='Correction'; showStep('correction')">CORRECTION</button>
+                    <button class="btn-sub" style="width:100%; margin-top:10px;" onclick="state.phase='Impulse'; showStep('impulse')">IMPULSE</button>`;
+            } else if(s === 'impulse') {
+                state.dealStatus = 'Waiting';
+                flow.innerHTML = `<div class="glass-card">Phase: Impulse. Waiting for structural shift.</div>
+                    <button class="btn-glass" style="width:100%" onclick="state.phase='Correction'; showStep('correction')">SHIFT TO CORRECTION</button>
+                    <button class="btn-sub" style="width:100%; margin-top:10px;" onclick="saveAll()">CONFIRM ANALYSIS</button>`;
+            } else if(s === 'correction') {
+                state.dealStatus = 'Searching Entry';
+                flow.innerHTML = `<div class="glass-card">Phase: Correction. Looking for POI/FVG entry.</div>
+                    <button class="btn-glass" style="width:100%" onclick="showStep('form')">ENTRY FOUND</button>
+                    <button class="btn-sub" style="width:100%; margin-top:10px;" onclick="saveAll()">NO ENTRY YET</button>`;
+            } else if(s === 'form') {
+                flow.innerHTML = `<h3>Trade Setup</h3>
+                    <input class="notes-area" id="in-e" type="number" placeholder="Entry Price" style="min-height:50px; margin-bottom:10px;">
+                    <input class="notes-area" id="in-sl" type="number" placeholder="Stop Loss" style="min-height:50px; margin-bottom:10px;">
+                    <input class="notes-area" id="in-rr" placeholder="RR Ratio" style="min-height:50px; margin-bottom:10px;">
+                    <button class="btn-glass" style="width:100%" onclick="submitDeal()">SAVE POSITION</button>`;
             }
-            updateMainUI();
+            updateUI();
         }
 
         function submitDeal() {
-            state.dealStatus = 'В СДЕЛКЕ';
+            state.dealStatus = 'IN TRADE';
             state.details = `E: ${document.getElementById('in-e').value} | SL: ${document.getElementById('in-sl').value} | RR: ${document.getElementById('in-rr').value}`;
-            saveState();
+            saveAll();
         }
 
-        function updateMainUI() {
-            document.getElementById('ui-phase').innerText = state.phase;
-            document.getElementById('ui-deal').innerText = state.dealStatus;
+        function saveNotes() {
+            state.notes = document.getElementById('ui-notes').value;
+            tg.CloudStorage.setItem('smc_v4_data', JSON.stringify(state));
+        }
+
+        function updateUI() {
+            document.getElementById('ui-phase').innerText = state.phase.toUpperCase();
+            document.getElementById('ui-deal').innerText = state.dealStatus.toUpperCase();
             document.getElementById('ui-details').innerText = state.details;
         }
 
-        function saveState() {
+        function saveAll() {
             const today = new Date().toISOString().slice(0,10);
             if(!state.history.includes(today)) state.history.push(today);
-            
-            // СОХРАНЕНИЕ В ОБЛАКО ТЕЛЕГРАМ
-            tg.CloudStorage.setItem('smc_quantum_data', JSON.stringify(state), (err) => {
-                if(!err) {
-                    tg.HapticFeedback.notificationOccurred('success');
-                    nav('scr-main');
-                }
+            tg.CloudStorage.setItem('smc_v4_data', JSON.stringify(state), () => {
+                tg.HapticFeedback.notificationOccurred('success');
+                nav('scr-main');
             });
         }
 
-        function initEcon() {
-            const box = document.getElementById('econ-widget'); box.innerHTML = '';
-            const script = document.createElement('script');
-            script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-events.js';
-            script.async = true;
-            script.text = JSON.stringify({colorTheme: "dark", width: "100%", height: "100%", locale: "ru", importanceFilter: "1"});
-            box.appendChild(script);
-        }
-
         fetch('https://api.alternative.me/fng/').then(r=>r.json()).then(d=>{
-            document.getElementById('fng-info').innerText = `Fear & Greed Index: ${d.data[0].value} (${d.data[0].value_classification})`;
+            document.getElementById('fng').innerText = `F&G: ${d.data[0].value}`;
         });
 
-        // Запуск загрузки
-        loadFromCloud();
+        loadData();
     </script>
 </body>
 </html>
